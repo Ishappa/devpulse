@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DevPulse — Staff-Engineer Project Brief</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-soft: #161b22;
+    --bg-card: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-2: #3fb950;
+    --warn: #d29922;
+    --danger: #f85149;
+    --purple: #bc8cff;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); line-height: 1.65; font-size: 16px;
+  }
+  .layout { display: grid; grid-template-columns: 280px 1fr; }
+  nav {
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    background: var(--bg-soft); border-right: 1px solid var(--border);
+    padding: 24px 16px;
+  }
+  nav h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 8px; }
+  nav .brand { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  nav .brand span { color: var(--accent); }
+  nav .tag { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  nav a { display: block; color: var(--muted); text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 13.5px; }
+  nav a:hover { background: var(--bg-card); color: var(--text); }
+  main { padding: 48px 56px; max-width: 1100px; }
+  h1 { font-size: 40px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 19px; color: var(--muted); margin-bottom: 28px; }
+  section { margin-bottom: 56px; scroll-margin-top: 24px; border-top: 1px solid var(--border); padding-top: 28px; }
+  section:first-of-type { border-top: none; }
+  h2 { font-size: 28px; margin: 0 0 16px; letter-spacing: -0.01em; }
+  h2 .num { color: var(--accent); font-size: 18px; font-family: var(--mono); margin-right: 10px; }
+  h3 { font-size: 19px; margin: 26px 0 10px; color: var(--text); }
+  h4 { font-size: 16px; margin: 18px 0 8px; color: var(--accent); }
+  p, li { color: var(--text); }
+  code { font-family: var(--mono); background: var(--bg-card); padding: 2px 6px; border-radius: 5px; font-size: 13.5px; color: var(--purple); }
+  pre { background: #010409; border: 1px solid var(--border); border-radius: 10px; padding: 18px; overflow-x: auto; font-family: var(--mono); font-size: 13px; line-height: 1.55; }
+  pre code { background: none; padding: 0; color: var(--text); }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pill { display: inline-block; font-size: 12px; font-family: var(--mono); padding: 3px 10px; border-radius: 20px; margin: 2px 4px 2px 0; }
+  .pill.fe { background: rgba(88,166,255,.15); color: var(--accent); border: 1px solid rgba(88,166,255,.3); }
+  .pill.be { background: rgba(63,185,80,.15); color: var(--accent-2); border: 1px solid rgba(63,185,80,.3); }
+  .pill.infra { background: rgba(188,140,255,.15); color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--bg-soft); color: var(--accent); font-weight: 600; }
+  td code { font-size: 12.5px; }
+  .scale-block { border-left: 3px solid var(--border); padding-left: 16px; margin: 14px 0; }
+  .scale-block.now { border-color: var(--accent); }
+  .scale-block.break { border-color: var(--danger); }
+  .scale-block.fix { border-color: var(--accent-2); }
+  .scale-block .label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+  .now .label { color: var(--accent); }
+  .break .label { color: var(--danger); }
+  .fix .label { color: var(--accent-2); }
+  .metric { display: inline-block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; margin: 6px; min-width: 150px; }
+  .metric .big { font-size: 26px; font-weight: 800; color: var(--accent-2); display: block; }
+  .metric .lbl { font-size: 12.5px; color: var(--muted); }
+  blockquote { border-left: 3px solid var(--accent); margin: 14px 0; padding: 6px 18px; background: var(--bg-soft); color: var(--muted); border-radius: 0 8px 8px 0; }
+  .callout { background: rgba(210,153,34,.1); border: 1px solid rgba(210,153,34,.35); border-radius: 10px; padding: 14px 18px; margin: 14px 0; }
+  .callout .t { color: var(--warn); font-weight: 700; }
+  .ref-link { display:inline-block; font-family: var(--mono); font-size:12.5px; background: rgba(88,166,255,.12); border:1px solid rgba(88,166,255,.3); color: var(--accent); padding:3px 10px; border-radius:6px; text-decoration:none; margin-top:8px;}
+  ul.clean { list-style: none; padding-left: 0; }
+  ul.clean li { padding: 4px 0 4px 24px; position: relative; }
+  ul.clean li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
+  .qcard { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--purple); border-radius: 8px; padding: 14px 18px; margin: 10px 0; }
+  .qcard .q { font-weight: 600; color: var(--text); }
+  .qcard .a { color: var(--muted); font-size: 14.5px; margin-top: 6px; }
+  .footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 40px; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    nav { position: static; height: auto; }
+    main { padding: 28px 20px; }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="brand">Dev<span>Pulse</span></div>
+  <div class="tag">Staff-Engineer Project Brief</div>
+  <h2>Decision</h2>
+  <a href="#why">Why this project</a>
+  <h2>Product</h2>
+  <a href="#name">1. Name</a>
+  <a href="#pitch">2. Pitch</a>
+  <a href="#problem">3. Problem</a>
+  <a href="#story">4. Interview Story</a>
+  <h2>Architecture</h2>
+  <a href="#arch">5. Full Architecture</a>
+  <a href="#stack">6. Tech Stack</a>
+  <a href="#db">7. Database Design</a>
+  <a href="#render">8. Rendering Strategy</a>
+  <a href="#state">9. State Management</a>
+  <a href="#api">10. API Design</a>
+  <a href="#folders">11. Folder Structure</a>
+  <h2>Execution</h2>
+  <a href="#mvp">12. MVP Roadmap</a>
+  <a href="#stretch">13. Stretch Goals</a>
+  <a href="#perf">14. Performance</a>
+  <a href="#security">15. Security</a>
+  <a href="#testing">16. Testing</a>
+  <a href="#observability">17. Observability</a>
+  <h2>Outcomes</h2>
+  <a href="#results">18. Quantifiable Results</a>
+  <a href="#resume">19. Resume Bullets</a>
+  <a href="#talking">20. Talking Points</a>
+  <a href="#questions">21. Interview Questions</a>
+  <h2>Reference Files</h2>
+  <a href="reference/01-trend-scoring-deep-dive.md">→ Trend Scoring Algorithm</a>
+  <a href="reference/02-caching-architecture.md">→ Caching Architecture</a>
+  <a href="reference/03-rendering-and-data-fetching.md">→ Rendering & Data Fetching</a>
+  <a href="reference/04-interview-prep.md">→ Interview Prep Q&A</a>
+  <a href="reference/05-system-design-scaling.md">→ System Design / Scaling</a>
+</nav>
+
+<main>
+<h1>Dev<span>Pulse</span></h1>
+<div class="subtitle">A developer-trend intelligence platform — design brief, technical decisions, and interview playbook.</div>
+
+<!-- ============ WHY ============ -->
+<section id="why">
+<h2>Why this project (Staff-Engineer justification)</h2>
+<p>You were given four candidate directions. Here's my ranking and the reasoning, because <em>choosing the project well is itself an interview signal.</em></p>
+<table>
+<tr><th>Candidate</th><th>Interview value</th><th>Verdict</th></tr>
+<tr><td>Weather/expense/task clone</td><td>None — pattern-matched as "bootcamp"</td><td>❌ Banned by brief</td></tr>
+<tr><td>Knowledge Discovery (OpenLibrary)</td><td>Search is interesting, but data is static & low-velocity. Weak caching story.</td><td>△ Thin</td></tr>
+<tr><td>GitHub-only dashboard</td><td>Good API integration, but single-source = shallow systems story</td><td>△ OK</td></tr>
+<tr><td><strong>GitHub × Hacker News Trend Intelligence (DevPulse)</strong></td><td>Multi-source ingestion, rate-limit orchestration, a real <em>computed</em> artifact (trend score), multi-layer caching, time-series data, search + filter, personalization</td><td>✅ <strong>Chosen</strong></td></tr>
+</table>
+<blockquote>The winning move: pick a project whose <strong>hardest part is a system-design problem, not a UI problem.</strong> DevPulse's core is "aggregate two rate-limited, eventually-consistent data sources, compute a derived trend signal on a schedule, and serve it sub-second to authenticated users." That sentence alone is a 45-minute interview.</blockquote>
+<p>Crucially, it satisfies <strong>every mandatory requirement organically</strong> — SSR (personalized feed), ISR (trending pages), SSG (marketing/about), infinite scroll (feed), real-time-ish (poll/revalidate), search+filter (tech radar), rate limiting (API protection + upstream budget), caching (the whole point). Nothing is bolted on for the checklist.</p>
+</section>
+
+<!-- ============ 1 NAME ============ -->
+<section id="name">
+<h2><span class="num">01</span>Project Name</h2>
+<p><strong>DevPulse</strong> — with the tagline <em>"Feel the pulse of what developers are building."</em></p>
+<p>Memorable, product-shaped, domain-available pattern (e.g. <code>devpulse.app</code>), and it names the core value prop: a <em>pulse</em> (a moving signal over time), not a static list.</p>
+</section>
+
+<!-- ============ 2 PITCH ============ -->
+<section id="pitch">
+<h2><span class="num">02</span>One-Line Pitch</h2>
+<div class="card" style="font-size:18px;">
+DevPulse aggregates GitHub and Hacker News in real time and computes a unified <strong>momentum score</strong> so engineers can see which technologies, repos, and ideas are gaining traction <em>before</em> they hit the mainstream.
+</div>
+</section>
+
+<!-- ============ 3 PROBLEM ============ -->
+<section id="problem">
+<h2><span class="num">03</span>Problem Statement</h2>
+<p>Developers suffer from <strong>signal fragmentation</strong>. The information that predicts what's worth learning is scattered:</p>
+<ul class="clean">
+<li>GitHub trending shows <em>stars</em>, but stars are a lagging, gameable vanity metric and the page has no history.</li>
+<li>Hacker News shows <em>discussion</em>, but it's a firehose with no per-technology aggregation.</li>
+<li>Neither tells you <strong>velocity</strong> — is this rising or already peaked? — which is the only thing that matters for "should I invest my learning time here."</li>
+</ul>
+<p>DevPulse solves this by joining the two sources around <strong>entities</strong> (a repo, a language, a topic) and computing a time-decayed momentum score that blends star velocity, HN discussion volume, and sentiment. The output answers a real question: <em>"What is gaining momentum right now, and is it accelerating?"</em></p>
+</section>
+
+<!-- ============ 4 STORY ============ -->
+<section id="story">
+<h2><span class="num">04</span>Interview Story</h2>
+<p>This is the narrative you walk an interviewer through. It demonstrates that you think like an engineer who ships, not a tutorial-follower.</p>
+<div class="card">
+<p>"I wanted to track emerging dev tools but the data lived in two places with hostile constraints — GitHub's API gives you 5,000 authenticated requests/hour, Hacker News' Firebase API is unauthenticated but you have to fan out one request <em>per item</em>. So the project became an exercise in <strong>respecting upstream rate limits while serving fresh data fast.</strong></p>
+<p>I built an ingestion layer that runs on a cron (Vercel Cron + a queue), normalizes both sources into a common entity model, and computes a momentum score with time decay. The read path never touches the upstream APIs — it reads from Postgres and a Redis cache, so a viral spike in <em>my</em> traffic can't blow my GitHub budget. That decoupling of write-path (ingest) from read-path (serve) is the core architectural decision, and it's exactly what you'd do at scale with Kafka and a worker fleet — I just did the single-node version with a cron and Upstash."</p>
+</div>
+<p>That story hits: rate-limit reasoning, read/write path separation, caching, derived data, and an explicit "here's how it scales" — all unprompted.</p>
+</section>
+
+<!-- ============ 5 ARCHITECTURE ============ -->
+<section id="arch">
+<h2><span class="num">05</span>Full Architecture</h2>
+<pre><code>                                  ┌─────────────────────────────────────────┐
+                                  │              CLIENT (Browser)             │
+                                  │   Next.js App Router · React Server +     │
+                                  │   Client Components · Redux Toolkit (UI)  │
+                                  └───────────────┬───────────────────────────┘
+                                                  │ HTTPS
+                                  ┌───────────────▼───────────────────────────┐
+                                  │            VERCEL EDGE / CDN                │
+                                  │  Static assets · ISR cache · Middleware     │
+                                  │  (auth gate, rate-limit header, geo)        │
+                                  └───────────────┬───────────────────────────┘
+                                                  │
+              ┌───────────────────────────────────┼───────────────────────────────────┐
+              │  READ PATH (hot, user-facing)      │   WRITE PATH (cold, scheduled)     │
+              ▼                                    ▼                                    │
+ ┌────────────────────────┐          ┌──────────────────────────┐                      │
+ │  Next.js Route Handlers │          │   Vercel Cron (every 15m) │                     │
+ │  /api/* + RSC fetches   │          │   → /api/cron/ingest      │                     │
+ │  · NextAuth session     │          └─────────────┬────────────┘                      │
+ │  · Zod validation       │                        │ enqueue jobs                       │
+ │  · Upstash rate-limit   │                        ▼                                    │
+ └───────┬────────┬────────┘          ┌──────────────────────────┐                      │
+         │        │                   │  Upstash QStash (queue)   │                      │
+   cache │        │ miss              │  fan-out + retries + DLQ  │                      │
+         ▼        ▼                   └─────────────┬────────────┘                      │
+ ┌──────────────┐ ┌──────────────┐                 │ HTTP callback                       │
+ │ Upstash Redis│ │  Supabase    │◄────────────────┤                                     │
+ │ (read cache, │ │  Postgres    │   ┌─────────────▼────────────┐                        │
+ │  rate limit, │ │  (entities,  │   │  Ingest Worker (Route     │                        │
+ │  sessions,   │ │  snapshots,  │   │  Handler) · normalize ·   │                        │
+ │  leaderboard)│ │  users)      │   │  score · upsert snapshot  │                        │
+ └──────────────┘ └──────┬───────┘   └─────┬───────────────┬─────┘                        │
+                         │                 │               │                              │
+                         │           ┌─────▼─────┐   ┌──────▼──────┐                       │
+                         │           │ GitHub API│   │ Hacker News │  (rate-limited        │
+                         │           │ (REST/    │   │ Firebase API│   upstreams)          │
+                         │           │  GraphQL) │   │             │                       │
+                         │           └───────────┘   └─────────────┘                       │
+                         ▼                                                                 │
+              ┌────────────────────┐                                                       │
+              │ Sentry (errors)     │  Axiom/Logflare (logs) · Vercel Analytics (RUM)       │
+              └────────────────────┘                                                       │
+</code></pre>
+<p><strong>The one idea that makes this senior:</strong> the read path and write path never share a synchronous call to an upstream API. Users read pre-computed snapshots; the cron/queue writes them. This is the single-node shape of an event-driven ingestion pipeline.</p>
+<a class="ref-link" href="reference/05-system-design-scaling.md">→ Full scaling deep-dive (100k → 10M users)</a>
+</section>
+
+<!-- ============ 6 TECH STACK ============ -->
+<section id="stack">
+<h2><span class="num">06</span>Complete Tech Stack — every choice defended</h2>
+<div>
+  <span class="pill fe">Next.js 14 App Router</span><span class="pill fe">TypeScript</span><span class="pill fe">Tailwind</span><span class="pill fe">Redux Toolkit</span>
+  <span class="pill be">Route Handlers</span><span class="pill be">Zod</span><span class="pill be">NextAuth</span>
+  <span class="pill infra">Supabase Postgres</span><span class="pill infra">Upstash Redis</span><span class="pill infra">QStash</span><span class="pill infra">Vercel</span><span class="pill infra">Sentry</span>
+</div>
+
+<table>
+<tr><th>Tech</th><th>Why chosen</th><th>Alternatives considered</th><th>Tradeoff accepted</th></tr>
+<tr><td><strong>Next.js 14 App Router</strong></td><td>RSC lets me fetch on the server and ship zero JS for read-only views — directly serves the LCP/INP targets. Built-in ISR is exactly the caching primitive trending pages need.</td><td>Remix (great, smaller ecosystem), Vite SPA + separate API (loses SSR/SEO)</td><td>App Router has a steeper mental model (server vs client boundary); pays off in perf.</td></tr>
+<tr><td><strong>TypeScript</strong></td><td>The entity/snapshot model is shared across ingest, API, and UI; types are the contract that keeps them in sync. Zod-inferred types mean validation and types share one source of truth.</td><td>JSDoc, plain JS</td><td>Build/setup overhead — negligible at this scale.</td></tr>
+<tr><td><strong>Route Handlers (not Spring Boot)</strong></td><td><strong>Deliberate.</strong> Co-locating the API with the frontend on Vercel removes a network hop, a deploy target, and CORS. The compute here is I/O-bound (fetch + cache), not CPU-bound, so the JVM buys nothing. One language across the stack speeds a solo dev.</td><td>Spring Boot (my backend skill) — would add a separate deploy, cold-start mismatch, and infra cost for no latency win here.</td><td>If ingestion became CPU-heavy (e.g. ML scoring), I'd extract a Spring Boot/worker service. I note <em>when</em> I'd switch — that's the senior signal.</td></tr>
+<tr><td><strong>Supabase (Postgres)</strong></td><td>I need relational joins (entity ↔ snapshots ↔ sources) and time-series queries with window functions. Postgres does both natively; Supabase gives me connection pooling (PgBouncer), Row-Level Security, and a generous free tier.</td><td>PlanetScale (MySQL, no native FK/window-function ergonomics, Vitess sharding I don't need yet), Mongo (wrong shape — this data is relational)</td><td>Postgres connection limits on serverless — solved with Supabase's pooler / Prisma Data Proxy.</td></tr>
+<tr><td><strong>Upstash Redis</strong></td><td>Serverless-native (HTTP, no persistent connection — critical on Vercel functions). Powers three things: read cache, sliding-window rate limiting (<code>@upstash/ratelimit</code>), and a sorted-set leaderboard for "top movers."</td><td>Vercel KV (it's Upstash under the hood), self-hosted Redis (needs a server + connection mgmt)</td><td>HTTP latency slightly above TCP Redis — irrelevant vs. the upstream API latency it replaces.</td></tr>
+<tr><td><strong>Upstash QStash</strong></td><td>Serverless message queue with retries + DLQ, triggered by HTTP. Lets the cron fan out per-entity ingest jobs instead of one giant function that times out at Vercel's limit.</td><td>BullMQ (needs a long-running worker), raw cron loop (times out, no retry)</td><td>At-least-once delivery — I make the ingest upsert idempotent.</td></tr>
+<tr><td><strong>NextAuth.js + GitHub OAuth</strong></td><td>GitHub OAuth is on-brand (devs already have accounts) and the token lets me personalize — "trends among repos you star." JWT session strategy = stateless, no session-table read on every request.</td><td>Clerk/Auth0 (paid, overkill), roll-my-own (security risk)</td><td>JWT can't be force-revoked server-side without extra work; acceptable for this app, noted in security section.</td></tr>
+<tr><td><strong>Redux Toolkit</strong></td><td>Client UI state that's genuinely global and cross-route: filter/sort config for the radar, comparison "tray" of pinned entities, command-palette state. RTK Query handles client-side server-state caching for authenticated, non-cacheable views.</td><td>Zustand (lighter, but RTK was a brief requirement & RTK Query earns its weight), Context (re-render storms)</td><td>Boilerplate — mitigated by RTK's <code>createSlice</code>.</td></tr>
+<tr><td><strong>Vercel</strong></td><td>First-class Next.js host: ISR, Edge Middleware, Cron, and preview deploys per PR. Free tier covers a portfolio.</td><td>Netlify, self-host on Fly.io</td><td>Vendor lock-in on ISR/Cron semantics — acceptable; the app logic is portable.</td></tr>
+</table>
+<a class="ref-link" href="reference/03-rendering-and-data-fetching.md">→ Deep-dive: Route Handlers vs. Spring Boot decision</a>
+</section>
+
+<!-- ============ 7 DATABASE ============ -->
+<section id="db">
+<h2><span class="num">07</span>Database Design</h2>
+<h3>ER Diagram (text)</h3>
+<pre><code>┌──────────────┐         ┌────────────────────┐         ┌──────────────────┐
+│    users     │         │      entities       │         │   tech_tags      │
+├──────────────┤         ├────────────────────┤         ├──────────────────┤
+│ id (PK)      │         │ id (PK)             │    ┌───►│ id (PK)          │
+│ github_id    │    ┌───►│ type (repo|topic|hn)│    │    │ slug (UQ)        │
+│ email        │    │    │ source_key (UQ w/ type)   │   │ name             │
+│ image_url    │    │    │ name                │    │    └──────────────────┘
+│ created_at   │    │    │ url                 │    │            ▲
+└──────┬───────┘    │    │ description         │    │            │ M:N
+       │ 1:N        │    │ language            │    │    ┌───────┴──────────┐
+       ▼            │    │ created_at          │    │    │ entity_tags       │
+┌──────────────┐    │    └─────────┬──────────┘    │    ├──────────────────┤
+│   watches    │    │              │ 1:N           │    │ entity_id (FK)    │
+├──────────────┤    │              ▼               │    │ tag_id (FK)       │
+│ id (PK)      │    │    ┌────────────────────┐    │    │ (PK: both)        │
+│ user_id (FK) ├────┘    │     snapshots       │    │    └──────────────────┘
+│ entity_id(FK)├─────────┤────────────────────┤    │
+│ created_at   │         │ id (PK)             │    │
+│ (UQ: user+   │         │ entity_id (FK)      │    │
+│  entity)     │         │ captured_at         │    │
+└──────────────┘         │ stars               │    │
+                         │ stars_delta         │    │
+                         │ hn_points           │    │
+                         │ hn_comments         │    │
+                         │ momentum_score      │    │
+                         │ (UQ: entity+        │    │
+                         │  captured_at)       │    │
+                         └────────────────────┘    │
+                                                    │
+                   (entities ──M:N── tech_tags via entity_tags)
+</code></pre>
+
+<h3>Schema (DDL sketch)</h3>
+<pre><code>-- entities: the thing being tracked (a repo, an HN-surfaced topic, a language)
+CREATE TABLE entities (
+  id            BIGSERIAL PRIMARY KEY,
+  type          entity_type NOT NULL,            -- enum: 'repo' | 'topic' | 'hn_story'
+  source_key    TEXT NOT NULL,                   -- e.g. 'vercel/next.js' or hn item id
+  name          TEXT NOT NULL,
+  url           TEXT,
+  description   TEXT,
+  language      TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (type, source_key)                      -- idempotent upsert key
+);
+
+-- snapshots: append-only time series, one row per entity per ingest run
+CREATE TABLE snapshots (
+  id              BIGSERIAL PRIMARY KEY,
+  entity_id       BIGINT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,
+  captured_at     TIMESTAMPTZ NOT NULL,
+  stars           INT,
+  stars_delta     INT,                           -- vs previous snapshot (pre-computed)
+  hn_points       INT,
+  hn_comments     INT,
+  momentum_score  NUMERIC(8,3) NOT NULL,         -- the derived signal
+  UNIQUE (entity_id, captured_at)
+);
+
+CREATE TABLE users (
+  id          BIGSERIAL PRIMARY KEY,
+  github_id   BIGINT UNIQUE NOT NULL,
+  email       TEXT,
+  image_url   TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE watches (                            -- a user's personalized watchlist
+  id         BIGSERIAL PRIMARY KEY,
+  user_id    BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  entity_id  BIGINT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (user_id, entity_id)
+);</code></pre>
+
+<h3>Indexing strategy</h3>
+<table>
+<tr><th>Index</th><th>Why</th></tr>
+<tr><td><code>UNIQUE(entities.type, source_key)</code></td><td>Upsert target for idempotent ingest; also the natural lookup key.</td></tr>
+<tr><td><code>UNIQUE(snapshots.entity_id, captured_at)</code></td><td>Prevents duplicate snapshots on queue retries (at-least-once delivery).</td></tr>
+<tr><td><code>idx_snapshots_latest (entity_id, captured_at DESC)</code></td><td>Powers "latest snapshot per entity" via <code>DISTINCT ON</code> — the hottest query.</td></tr>
+<tr><td><code>idx_snapshots_score (captured_at DESC, momentum_score DESC)</code></td><td>Powers the trending leaderboard for a given time bucket without a full scan.</td></tr>
+<tr><td><code>idx_entities_language (language)</code> + GIN on <code>name/description</code> via <code>pg_trgm</code></td><td>Filtering by language and fuzzy text search in the tech radar.</td></tr>
+<tr><td><code>UNIQUE(watches.user_id, entity_id)</code></td><td>Idempotent "watch" toggling; doubles as the lookup index.</td></tr>
+</table>
+
+<h3>Query optimization considerations</h3>
+<ul class="clean">
+<li><strong>Latest-snapshot query</strong> uses <code>SELECT DISTINCT ON (entity_id) ... ORDER BY entity_id, captured_at DESC</code> — index-backed, no window-function sort over the whole table.</li>
+<li><strong>Pre-compute on write, not read:</strong> <code>stars_delta</code> and <code>momentum_score</code> are written by the ingest worker so the read path is a plain indexed select — push work to the cold path.</li>
+<li><strong>Snapshots grow unbounded</strong> → partition by month (<code>PARTITION BY RANGE (captured_at)</code>) or a rollup job that downsamples old data to daily. Documented as the 100k-user fix.</li>
+<li><strong>Connection pooling:</strong> serverless functions exhaust Postgres connections; route through Supabase's PgBouncer (transaction mode) or Prisma Data Proxy.</li>
+</ul>
+<a class="ref-link" href="reference/01-trend-scoring-deep-dive.md">→ How momentum_score is computed</a>
+</section>
+
+<!-- ============ 8 RENDERING ============ -->
+<section id="render">
+<h2><span class="num">08</span>Rendering Strategy</h2>
+<p>The whole point of choosing App Router is matching each page's <em>data freshness × personalization</em> profile to the right rendering mode. This table is a frequent interview question on its own.</p>
+<table>
+<tr><th>Route</th><th>Mode</th><th>Why</th></tr>
+<tr><td><code>/</code> (landing/marketing)</td><td><strong>SSG</strong></td><td>Static content, no per-user data. Built once, served from CDN — instant LCP, perfect Lighthouse.</td></tr>
+<tr><td><code>/trending</code>, <code>/trending/[lang]</code></td><td><strong>ISR</strong> (<code>revalidate: 900</code>)</td><td>Same for every user, changes every 15 min (matches ingest cadence). ISR serves cached HTML to everyone and regenerates in the background — zero DB hit on the hot path. <code>generateStaticParams</code> pre-builds top languages.</td></tr>
+<tr><td><code>/entity/[id]</code> (detail + sparkline)</td><td><strong>ISR</strong> + on-demand <code>revalidatePath</code></td><td>Mostly stable; ingest worker calls <code>revalidatePath</code> when a snapshot for that entity lands — fresh without time-based waste.</td></tr>
+<tr><td><code>/feed</code> (personalized watchlist)</td><td><strong>SSR (dynamic)</strong></td><td>Depends on the authed user's <code>watches</code>. Can't be cached across users; rendered per-request with the session. Cookies/auth force dynamic.</td></tr>
+<tr><td><code>/radar</code> (search + filter)</td><td><strong>SSR shell + client interactivity</strong></td><td>Initial query SSR'd for SEO/first-paint; subsequent filtering hits a Route Handler (RTK Query) without full navigation.</td></tr>
+<tr><td><code>/about</code>, <code>/docs</code></td><td><strong>SSG</strong></td><td>Pure static.</td></tr>
+</table>
+<div class="callout"><span class="t">Interview line:</span> "I default to the most static mode a route can tolerate, then step up to ISR or SSR only when freshness or personalization demands it. <code>/trending</code> is ISR because it's identical for all users and tolerates 15-min staleness; <code>/feed</code> is SSR because it's keyed on the session."</div>
+<a class="ref-link" href="reference/03-rendering-and-data-fetching.md">→ Caching layers vs. rendering modes (how they stack)</a>
+</section>
+
+<!-- ============ 9 STATE ============ -->
+<section id="state">
+<h2><span class="num">09</span>State Management Strategy</h2>
+<h3>The mental model: three kinds of state</h3>
+<table>
+<tr><th>State kind</th><th>Lives in</th><th>Example</th></tr>
+<tr><td><strong>Server state</strong> (canonical, remote)</td><td>RSC fetch + ISR cache; or RTK Query for client-fetched authed data</td><td>Trending list, entity snapshots, the user's watchlist</td></tr>
+<tr><td><strong>Client UI state</strong> (ephemeral, global)</td><td>Redux Toolkit slices</td><td>Radar filter/sort config, comparison tray, command-palette open state, theme</td></tr>
+<tr><td><strong>Local component state</strong></td><td><code>useState</code></td><td>An input's value, a dropdown's open/close</td></tr>
+</table>
+
+<h3>Why Redux Toolkit</h3>
+<ul class="clean">
+<li>The filter/sort config on <code>/radar</code> is read by the results grid, the active-filter chips, and the URL-sync effect — three distant subtrees. A shared store beats prop-drilling.</li>
+<li>The "comparison tray" (pin entities to compare sparklines) persists across route changes — global, not page-local.</li>
+<li><strong>RTK Query</strong> gives me request dedup, caching, and <code>invalidatesTags</code> for the authed, non-ISR-cacheable views (watchlist mutations) — without hand-rolling fetch state.</li>
+</ul>
+
+<h3>Why NOT Context API</h3>
+<p>Context has no concept of selectors — any value change re-renders <em>every</em> consumer. The radar filter state changes on every keystroke; with Context the entire results grid would re-render per character. Redux's <code>useSelector</code> with referential equality (or <code>createSelector</code> memoization) lets only the affected components re-render. Context is for low-frequency, truly-global values (theme, locale) — and even those I'd colocate, not centralize.</p>
+<div class="callout"><span class="t">Senior nuance:</span> "Most of my 'state' is actually <em>server</em> state, and the App Router handles that with the fetch cache — so Redux stays small and only owns genuine client UI state. Reaching for Redux to hold server data is the anti-pattern I avoid."</div>
+</section>
+
+<!-- ============ 10 API ============ -->
+<section id="api">
+<h2><span class="num">10</span>API Design</h2>
+<p>REST-ish Route Handlers. Every input validated with Zod at the boundary; every list endpoint is cursor-paginated (no <code>OFFSET</code> — it's O(n) and breaks under insert load).</p>
+<table>
+<tr><th>Endpoint</th><th>Method</th><th>Purpose</th><th>Auth</th></tr>
+<tr><td><code>/api/trending</code></td><td>GET</td><td>Leaderboard, filterable by <code>lang</code>, <code>window</code></td><td>Public</td></tr>
+<tr><td><code>/api/entities/:id</code></td><td>GET</td><td>Entity detail + snapshot series</td><td>Public</td></tr>
+<tr><td><code>/api/search</code></td><td>GET</td><td>Fuzzy search + filter (cursor paginated)</td><td>Public, rate-limited</td></tr>
+<tr><td><code>/api/watches</code></td><td>GET / POST / DELETE</td><td>Read/toggle the user's watchlist</td><td>Authed</td></tr>
+<tr><td><code>/api/feed</code></td><td>GET</td><td>Personalized momentum feed</td><td>Authed</td></tr>
+<tr><td><code>/api/cron/ingest</code></td><td>POST</td><td>Cron-triggered ingest fan-out</td><td>Cron secret</td></tr>
+<tr><td><code>/api/jobs/ingest-entity</code></td><td>POST</td><td>QStash worker callback (one entity)</td><td>QStash signature</td></tr>
+</table>
+
+<h4>Request / Response shape (example)</h4>
+<pre><code>GET /api/search?q=rust&lang=rust&window=7d&cursor=eyJpZCI6MTI4fQ&limit=20
+
+200 OK
+{
+  "data": [
+    {
+      "id": 128,
+      "type": "repo",
+      "name": "tokio-rs/tokio",
+      "language": "Rust",
+      "momentumScore": 87.42,
+      "starsDelta7d": 1430,
+      "hnMentions7d": 6,
+      "sparkline": [71.2, 74.0, 79.5, 87.42]
+    }
+  ],
+  "nextCursor": "eyJpZCI6MTQ4fQ",      // opaque, base64({id, score})
+  "hasMore": true
+}
+
+400 Bad Request   { "error": "VALIDATION", "issues": [{ "path": "window", "msg": "expected 1d|7d|30d" }] }
+429 Too Many      { "error": "RATE_LIMIT", "retryAfter": 38 }
+</code></pre>
+
+<h4>Validation strategy</h4>
+<pre><code>const SearchQuery = z.object({
+  q:      z.string().trim().min(1).max(64).optional(),
+  lang:   z.string().max(32).optional(),
+  window: z.enum(['1d', '7d', '30d']).default('7d'),
+  cursor: z.string().max(256).optional(),
+  limit:  z.coerce.number().int().min(1).max(50).default(20),
+});
+// Parse at the boundary; the inferred type IS the handler's input type.
+const parsed = SearchQuery.safeParse(searchParamsToObject(req));
+if (!parsed.success) return json(400, { error: 'VALIDATION', issues: parsed.error.issues });</code></pre>
+<ul class="clean">
+<li><strong>Cursor, not offset:</strong> stable under concurrent inserts and O(log n) via the indexed <code>(score, id)</code> tuple.</li>
+<li><strong>Consistent error envelope</strong> (<code>error</code> code + details) so the client can branch reliably.</li>
+<li><strong>Every external input</strong> (query, body, headers) crosses a Zod gate — never trust the client.</li>
+</ul>
+</section>
+
+<!-- ============ 11 FOLDERS ============ -->
+<section id="folders">
+<h2><span class="num">11</span>Folder Structure</h2>
+<pre><code>devpulse/
+├─ app/                          # App Router — routing + rendering
+│  ├─ (marketing)/               # route group: SSG pages, separate layout
+│  │  ├─ page.tsx                #   landing  (SSG)
+│  │  └─ about/page.tsx
+│  ├─ (app)/                     # route group: the authed product shell
+│  │  ├─ trending/[[...lang]]/page.tsx   # ISR
+│  │  ├─ entity/[id]/page.tsx            # ISR + on-demand revalidate
+│  │  ├─ radar/page.tsx                  # SSR shell + client filters
+│  │  └─ feed/page.tsx                   # SSR (per-user)
+│  ├─ api/                       # Route Handlers (the backend)
+│  │  ├─ trending/route.ts
+│  │  ├─ search/route.ts
+│  │  ├─ watches/route.ts
+│  │  ├─ cron/ingest/route.ts
+│  │  └─ jobs/ingest-entity/route.ts
+│  ├─ layout.tsx                 # root layout, providers
+│  └─ globals.css
+├─ src/
+│  ├─ features/                  # feature-sliced; each owns its slice + UI + api
+│  │  ├─ radar/                  #   { radarSlice.ts, RadarGrid.tsx, useRadar.ts }
+│  │  ├─ watchlist/
+│  │  └─ trending/
+│  ├─ lib/                       # cross-cutting infra, framework-agnostic
+│  │  ├─ db/                     #   drizzle/prisma client + queries
+│  │  ├─ redis.ts                #   Upstash client + cache helpers
+│  │  ├─ ratelimit.ts            #   @upstash/ratelimit config
+│  │  ├─ github.ts / hackernews.ts  # upstream API clients (typed)
+│  │  ├─ scoring.ts              #   momentum algorithm (pure, unit-tested)
+│  │  └─ auth.ts                 #   NextAuth config
+│  ├─ store/                     # Redux store + RTK Query base api
+│  ├─ components/ui/             # design-system primitives (Button, Card…)
+│  └─ schemas/                   # Zod schemas — single source of truth for types
+├─ tests/
+│  ├─ unit/                      # vitest — scoring, utils, slices
+│  ├─ integration/               # route handlers w/ test DB + mocked upstreams
+│  └─ e2e/                       # playwright — auth flow, search, watch
+├─ docs/                         # this brief + reference files
+└─ ...config (next, tailwind, vitest, playwright, drizzle)
+</code></pre>
+<ul class="clean">
+<li><strong><code>app/</code></strong> holds only routing + rendering; business logic lives in <code>src/</code> so it's testable without booting Next.</li>
+<li><strong>Route groups</strong> <code>(marketing)</code> / <code>(app)</code> let me give marketing a light layout (no Redux providers) and the product a heavy one — keeps marketing JS tiny for Lighthouse.</li>
+<li><strong>Feature-sliced <code>src/features/</code></strong>: each feature co-locates its slice, components, and hooks — changes stay local, no god-folders of <code>components/</code> vs <code>slices/</code>.</li>
+<li><strong><code>src/lib/scoring.ts</code></strong> is a pure function — the most-tested file, zero framework deps.</li>
+<li><strong><code>src/schemas/</code></strong> Zod is the one source of truth: validation + inferred TS types together.</li>
+</ul>
+</section>
+
+<!-- ============ 12 MVP ============ -->
+<section id="mvp">
+<h2><span class="num">12</span>MVP Roadmap — Week 1–2</h2>
+<h3>Week 1 — Foundation & write path</h3>
+<ul class="clean">
+<li><strong>Day 1–2:</strong> Scaffold Next 14 + TS + Tailwind. Supabase schema + migrations (Drizzle). Upstash Redis + QStash provisioned. CI (lint, typecheck, test) on GitHub Actions.</li>
+<li><strong>Day 3–4:</strong> Upstream clients (<code>github.ts</code>, <code>hackernews.ts</code>) with typed responses + retry/backoff. <code>scoring.ts</code> momentum algorithm — TDD'd, since it's pure.</li>
+<li><strong>Day 5–7:</strong> Ingest pipeline: <code>/api/cron/ingest</code> fans out to QStash → <code>/api/jobs/ingest-entity</code> normalizes + upserts snapshots idempotently. Verify with Vercel Cron on a preview deploy.</li>
+</ul>
+<h3>Week 2 — Read path & core UI</h3>
+<ul class="clean">
+<li><strong>Day 8–9:</strong> <code>/trending</code> as ISR with <code>generateStaticParams</code> for top languages. Redis read cache on the leaderboard query. Loading/empty/error states.</li>
+<li><strong>Day 10–11:</strong> <code>/radar</code> search + filter via <code>/api/search</code> (Zod + cursor pagination + rate limit) with infinite scroll (Intersection Observer + RTK Query).</li>
+<li><strong>Day 12–13:</strong> NextAuth + GitHub OAuth. <code>/feed</code> SSR personalized. <code>watches</code> toggle with optimistic update + RTK Query tag invalidation.</li>
+<li><strong>Day 14:</strong> Entity detail page with snapshot sparkline (lightweight SVG, no heavy chart lib). Responsive pass + Lighthouse audit.</li>
+</ul>
+<div class="callout"><span class="t">Definition of MVP done:</span> a public user sees fresh trending data with search; an authed user has a personalized feed and watchlist; the read path never calls an upstream API; Lighthouse ≥95 on <code>/</code> and <code>/trending</code>.</div>
+</section>
+
+<!-- ============ 13 STRETCH ============ -->
+<section id="stretch">
+<h2><span class="num">13</span>Stretch Goals — Week 3–4</h2>
+<ul class="clean">
+<li><strong>Tech Radar visualization:</strong> quadrant/ring view (adopt/trial/assess/hold) computed from momentum bands — the "wow" screenshot for the portfolio.</li>
+<li><strong>Comparison tray:</strong> pin up to 4 entities, overlay sparklines — showcases Redux global state.</li>
+<li><strong>Email digest:</strong> weekly "top movers in your watched languages" via QStash schedule + Resend — demonstrates background jobs end-to-end.</li>
+<li><strong>Snapshot partitioning + rollup job:</strong> implement the time-series scaling fix for real — strong interview material.</li>
+<li><strong>Real-time-ish updates:</strong> Supabase Realtime or SWR polling on <code>/feed</code> so new snapshots appear without refresh.</li>
+<li><strong>Observability dashboard:</strong> ingest success rate, upstream rate-limit headroom, p95 read latency — surfaced on an internal <code>/ops</code> page (admin-authorized).</li>
+<li><strong>Playwright E2E in CI</strong> + Lighthouse CI budget gate on every PR.</li>
+</ul>
+</section>
+
+<!-- ============ 14 PERF ============ -->
+<section id="perf">
+<h2><span class="num">14</span>Performance Optimizations</h2>
+<table>
+<tr><th>Technique</th><th>What I do</th><th>Metric improved</th><th>How measured</th></tr>
+<tr><td><strong>Server Components</strong></td><td>Trending/detail render on the server; ship HTML, zero component JS for read-only views</td><td>LCP, INP, TBT</td><td>Lighthouse + bundle analyzer (RSC = 0 KB client)</td></tr>
+<tr><td><strong>ISR + CDN</strong></td><td>Trending HTML served from Vercel's edge cache; DB untouched on hot path</td><td>LCP, TTFB</td><td>Vercel Analytics TTFB; <code>x-vercel-cache: HIT</code></td></tr>
+<tr><td><strong>Code splitting / dynamic import</strong></td><td>Command palette, comparison tray, charts loaded via <code>next/dynamic</code> on interaction</td><td>TBT, INP, initial JS</td><td><code>@next/bundle-analyzer</code> before/after</td></tr>
+<tr><td><strong>Image optimization</strong></td><td><code>next/image</code> for avatars/og; AVIF/WebP, explicit width/height to reserve space</td><td>LCP, CLS</td><td>Lighthouse "properly sized images" + CLS panel</td></tr>
+<tr><td><strong>Font optimization</strong></td><td><code>next/font</code> self-hosts + <code>display: swap</code>, no layout shift, no render-block</td><td>CLS, LCP</td><td>WebPageTest filmstrip</td></tr>
+<tr><td><strong>Multi-layer caching</strong></td><td>Redis read cache (60s) in front of Postgres; SWR semantics</td><td>TTFB, server load</td><td>Cache hit-rate in Redis; DB query count</td></tr>
+<tr><td><strong>Memoization</strong></td><td><code>createSelector</code> for derived radar lists; <code>React.memo</code> on grid rows; <code>useMemo</code> for filter compute</td><td>INP</td><td>React Profiler flamegraph; INP in field data</td></tr>
+<tr><td><strong>List virtualization</strong></td><td><code>@tanstack/react-virtual</code> renders only visible rows in long result lists</td><td>INP, memory</td><td>Profiler — DOM node count constant vs. list length</td></tr>
+<tr><td><strong>Skeleton + reserved layout</strong></td><td>Skeletons match final dimensions; no content jump</td><td>CLS</td><td>Lighthouse CLS = ~0</td></tr>
+</table>
+<a class="ref-link" href="reference/03-rendering-and-data-fetching.md">→ How caching layers stack with rendering modes</a>
+</section>
+
+<!-- ============ 15 SECURITY ============ -->
+<section id="security">
+<h2><span class="num">15</span>Security Measures</h2>
+<h4>Authentication flow</h4>
+<p>GitHub OAuth via NextAuth. User clicks login → redirected to GitHub → consents → GitHub redirects back with a code → NextAuth exchanges code for token server-side → issues a <strong>signed, httpOnly, SameSite=Lax JWT session cookie</strong>. The OAuth access token is encrypted in the JWT, never exposed to client JS.</p>
+<h4>Authorization strategy</h4>
+<ul class="clean">
+<li>Route Handlers call <code>auth()</code> server-side; unauthenticated requests to <code>/api/watches</code>, <code>/api/feed</code> get 401 before any DB access.</li>
+<li>Edge Middleware gates <code>(app)</code> routes — redirect to login if no session.</li>
+<li>Resource-level checks: a user can only mutate <em>their own</em> watches (<code>WHERE user_id = session.userId</code>) — never trust an <code>id</code> from the body. Admin <code>/ops</code> gated by an allowlist role claim.</li>
+</ul>
+<h4>XSS prevention</h4>
+<ul class="clean">
+<li>React escapes by default; <strong>never</strong> use <code>dangerouslySetInnerHTML</code> on upstream data (repo descriptions can contain markup).</li>
+<li>Strict <strong>Content-Security-Policy</strong> header (nonce-based for scripts) via middleware — defense in depth.</li>
+</ul>
+<h4>CSRF protection</h4>
+<ul class="clean">
+<li>NextAuth's built-in CSRF token on auth routes. <code>SameSite=Lax</code> cookies block cross-site form posts. State-changing endpoints are JSON-only + check <code>Origin</code> — a cross-site form can't set <code>Content-Type: application/json</code>.</li>
+</ul>
+<h4>Rate limiting</h4>
+<ul class="clean">
+<li><code>@upstash/ratelimit</code> sliding window — per-IP on public endpoints (e.g. 30 req/10s on <code>/api/search</code>), per-user on authed ones. Returns 429 + <code>Retry-After</code>.</li>
+<li>Separate <strong>upstream budget guard</strong>: the ingest worker tracks remaining GitHub quota in Redis and backs off — protects me from <em>my own</em> pipeline exhausting the API.</li>
+</ul>
+<h4>Input validation & secure API design</h4>
+<ul class="clean">
+<li>Zod at every boundary (covered in §10). Parameterized queries only (ORM) — no string-built SQL → no SQLi.</li>
+<li>Secrets in Vercel env vars, never in the bundle. Cron + QStash endpoints verify a shared secret / signature so they can't be triggered by the public.</li>
+<li>Security headers: <code>Strict-Transport-Security</code>, <code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: DENY</code>.</li>
+</ul>
+</section>
+
+<!-- ============ 16 TESTING ============ -->
+<section id="testing">
+<h2><span class="num">16</span>Testing Strategy</h2>
+<table>
+<tr><th>Layer</th><th>Tool</th><th>What it covers</th><th>Coverage goal</th></tr>
+<tr><td><strong>Unit</strong></td><td>Vitest</td><td>Pure logic: <code>scoring.ts</code> (heavily — every decay/edge case), cursor encode/decode, Zod schemas, Redux slices/selectors</td><td>~90% on <code>lib/</code> + slices</td></tr>
+<tr><td><strong>Integration</strong></td><td>Vitest + test Postgres (Testcontainers/Supabase branch) + MSW for upstreams</td><td>Route Handlers end-to-end: validation → auth → DB → response envelope; rate-limit 429; idempotent ingest upsert</td><td>All API routes' happy + key error paths</td></tr>
+<tr><td><strong>E2E</strong></td><td>Playwright</td><td>Critical user journeys: GitHub login, search→filter→infinite scroll, watch/unwatch with optimistic update, personalized feed renders</td><td>~5 smoke journeys in CI</td></tr>
+</table>
+<h4>What to test vs. not</h4>
+<ul class="clean">
+<li><strong>Test:</strong> the scoring algorithm (business-critical, pure, cheap to test), API contracts (envelope, status codes, auth boundaries), and the ingest idempotency guarantee.</li>
+<li><strong>Don't test:</strong> framework internals (Next routing), third-party SDKs (trust Upstash/NextAuth), trivial presentational components, or exact CSS. No snapshot tests of large DOM — brittle, low value.</li>
+<li><strong>Philosophy:</strong> heavy unit coverage on the pure core, a thin layer of integration tests where logic meets I/O, and a few high-value E2E journeys. Avoid the inverted "all E2E" pyramid — slow and flaky.</li>
+</ul>
+</section>
+
+<!-- ============ 17 OBSERVABILITY ============ -->
+<section id="observability">
+<h2><span class="num">17</span>Monitoring & Observability</h2>
+<table>
+<tr><th>Pillar</th><th>Tool (free tier)</th><th>What I capture</th></tr>
+<tr><td><strong>Error tracking</strong></td><td>Sentry</td><td>Client + server exceptions, source-mapped stack traces, release tagging, alert on error-rate spike</td></tr>
+<tr><td><strong>Logging</strong></td><td>Axiom / Logflare (structured JSON)</td><td>Ingest run id, entity count, upstream latency, rate-limit headroom — queryable, not <code>console.log</code></td></tr>
+<tr><td><strong>Analytics / RUM</strong></td><td>Vercel Analytics + Speed Insights</td><td>Field Core Web Vitals (LCP/CLS/INP) from real users — the only honest perf signal</td></tr>
+<tr><td><strong>Health monitoring</strong></td><td><code>/api/health</code> + UptimeRobot; QStash DLQ alerts</td><td>DB reachable, Redis reachable, last-successful-ingest age; failed jobs land in DLQ + alert</td></tr>
+</table>
+<div class="callout"><span class="t">Key metric to surface:</span> "time since last successful ingest." If the cron fails silently, the data goes stale invisibly — so I alert on staleness, not just on errors. That distinction (monitoring the <em>absence</em> of success) reads as production-minded.</div>
+</section>
+
+<!-- ============ 18 RESULTS ============ -->
+<section id="results">
+<h2><span class="num">18</span>Quantifiable Results</h2>
+<p>Realistic, defensible numbers (measure and substitute your actuals — never quote a number you can't reproduce in the interview).</p>
+<div>
+  <div class="metric"><span class="big">98</span><span class="lbl">Lighthouse perf (/, /trending)</span></div>
+  <div class="metric"><span class="big">~99%</span><span class="lbl">read requests served without an upstream API call</span></div>
+  <div class="metric"><span class="big">↓ 92%</span><span class="lbl">DB queries on hot path (Redis cache hit-rate)</span></div>
+  <div class="metric"><span class="big">1.1s</span><span class="lbl">LCP on trending (ISR + CDN) vs ~3.4s pre-cache</span></div>
+  <div class="metric"><span class="big">~140ms</span><span class="lbl">field INP (virtualized lists + memoized selectors)</span></div>
+  <div class="metric"><span class="big">0.02</span><span class="lbl">CLS (reserved layout + next/font)</span></div>
+  <div class="metric"><span class="big">5k→∞</span><span class="lbl">GitHub quota decoupled from user traffic via write/read split</span></div>
+</div>
+<p style="margin-top:14px;"><strong>The framing that matters:</strong> "by separating the write path (cron ingest) from the read path (cached reads), user traffic scales independently of upstream rate limits — 1 user or 100k users issue the same ~5k ingest calls/hour."</p>
+</section>
+
+<!-- ============ 19 RESUME ============ -->
+<section id="resume">
+<h2><span class="num">19</span>Resume Bullet Points</h2>
+<div class="card">
+<ul class="clean">
+<li>Architected <strong>DevPulse</strong>, a developer-trend intelligence platform (Next.js 14 App Router, TypeScript, Postgres, Redis) that aggregates GitHub & Hacker News and serves a computed momentum score to authenticated users.</li>
+<li>Designed a <strong>write/read-path separation</strong> (Vercel Cron → QStash queue → idempotent ingest worker) that decoupled user traffic from upstream rate limits, keeping GitHub API usage flat at ~5k calls/hr regardless of load.</li>
+<li>Cut hot-path database load <strong>~92%</strong> and trending-page LCP from ~3.4s to ~1.1s via a multi-layer caching strategy (Vercel ISR + CDN, Upstash Redis read cache) and React Server Components.</li>
+<li>Hardened the API with <strong>Zod boundary validation, sliding-window rate limiting, NextAuth GitHub OAuth, RLS, and a nonce-based CSP</strong>; achieved Lighthouse 95+ with INP ~140ms via list virtualization and memoized selectors.</li>
+<li>Built a test suite (Vitest unit + integration with mocked upstreams, Playwright E2E) and full observability (Sentry, structured logs, RUM Core Web Vitals, ingest-staleness alerting) wired into CI.</li>
+</ul>
+</div>
+</section>
+
+<!-- ============ 20 TALKING POINTS ============ -->
+<section id="talking">
+<h2><span class="num">20</span>Interview Talking Points (per feature)</h2>
+
+<h3>Ingestion pipeline (write path)</h3>
+<ul class="clean">
+<li><strong>Why it exists:</strong> upstream APIs are rate-limited and slow; serving from them directly is fragile and blows the quota.</li>
+<li><strong>Alternatives:</strong> (a) fetch-on-request with caching — still risks thundering-herd cache stampedes on cold keys; (b) one big cron loop — times out at Vercel's function limit, no per-item retry.</li>
+<li><strong>Tradeoff:</strong> QStash gives at-least-once delivery → I pay with idempotent upserts (unique constraint) instead of exactly-once complexity.</li>
+<li><strong>How to explain:</strong> "It's the single-node version of a Kafka + worker-fleet ingestion pipeline. Same shape, different scale."</li>
+</ul>
+
+<h3>Momentum score (derived data)</h3>
+<ul class="clean">
+<li><strong>Why:</strong> raw stars are a lagging vanity metric; velocity with time-decay answers the real question.</li>
+<li><strong>Alternatives:</strong> raw star count (gameable, no recency), simple delta (noisy). I use exponential time-decay weighting recent activity.</li>
+<li><strong>Tradeoff:</strong> computed on write (stale up to 15 min) vs. on read (fresh but expensive). I chose write — see <a href="reference/01-trend-scoring-deep-dive.md">scoring deep-dive</a>.</li>
+</ul>
+
+<h3>Caching (Redis + ISR)</h3>
+<ul class="clean">
+<li><strong>Why two layers:</strong> ISR caches rendered HTML at the edge (kills TTFB for everyone); Redis caches the query result for dynamic/authed paths ISR can't serve.</li>
+<li><strong>Tradeoff:</strong> staleness vs. freshness — tuned per route (15 min for trending, 60s for search results, on-demand revalidate for entity detail).</li>
+<li><strong>Invalidation:</strong> "there are only two hard problems…" — I use TTL + on-demand <code>revalidatePath</code> from the ingest worker rather than trying to be clever.</li>
+</ul>
+
+<h3>Auth & personalization</h3>
+<ul class="clean">
+<li><strong>Why JWT strategy:</strong> stateless, no session-table read per request — lower latency, simpler scaling.</li>
+<li><strong>Tradeoff:</strong> can't instantly revoke a JWT server-side; acceptable for this app, and I'd add a short TTL + denylist if it mattered.</li>
+</ul>
+
+<h3>Search + infinite scroll</h3>
+<ul class="clean">
+<li><strong>Why cursor pagination:</strong> <code>OFFSET</code> is O(n) and skips/dupes rows under concurrent inserts; cursors on an indexed tuple are stable and O(log n).</li>
+<li><strong>Why virtualization:</strong> rendering 1000 DOM rows tanks INP; virtual windowing keeps node count constant.</li>
+</ul>
+</section>
+
+<!-- ============ 21 QUESTIONS ============ -->
+<section id="questions">
+<h2><span class="num">21</span>Interview Questions this project prepares you for</h2>
+<p>Short answers below; full STAR-style answers in <a href="reference/04-interview-prep.md">the interview-prep reference</a>.</p>
+
+<div class="qcard"><div class="q">1. Design a system that aggregates data from rate-limited third-party APIs and serves it with low latency.</div><div class="a">Exactly DevPulse — write/read split, queue-based fan-out, idempotent upserts, multi-layer cache. Walk the architecture diagram.</div></div>
+<div class="qcard"><div class="q">2. SSR vs. SSG vs. ISR — when do you use each?</div><div class="a">Map to data-freshness × personalization. Landing=SSG, trending=ISR, feed=SSR. (See §8.)</div></div>
+<div class="qcard"><div class="q">3. How do you cache and how do you invalidate?</div><div class="a">Layered: CDN/ISR for HTML, Redis for query results. TTL + on-demand revalidatePath on write. Discuss stampede protection.</div></div>
+<div class="qcard"><div class="q">4. Offset vs. cursor pagination — tradeoffs?</div><div class="a">Offset O(n) + unstable under writes; cursor O(log n) + stable, but no random page jumps. (See §10.)</div></div>
+<div class="qcard"><div class="q">5. How would this scale to 100k / 10M users?</div><div class="a">Read path already CDN/cache-served. Bottlenecks: ingest fan-out, snapshot table growth, search. Fixes: Kafka, partitioning/rollups, dedicated search index. (See scaling reference.)</div></div>
+<div class="qcard"><div class="q">6. How do you keep server state and client state separate in React?</div><div class="a">Server state via RSC/RTK Query; Redux only for client UI state; useState for local. Why not Context. (See §9.)</div></div>
+<div class="qcard"><div class="q">7. Walk me through your auth flow and its security properties.</div><div class="a">OAuth code exchange, httpOnly SameSite JWT, server-side authz, resource ownership checks. (See §15.)</div></div>
+<div class="qcard"><div class="q">8. How do you prevent one feature's load from taking down a shared dependency?</div><div class="a">Rate limiting + the upstream budget guard; write/read decoupling; idempotency + DLQ for retries.</div></div>
+<div class="qcard"><div class="q">9. How do you hit Core Web Vitals targets and prove it?</div><div class="a">RSC, ISR, code splitting, virtualization, next/font, reserved layout — each mapped to a metric and measured via Lighthouse + field RUM. (See §14.)</div></div>
+<div class="qcard"><div class="q">10. Your data is eventually consistent (15-min stale). How do you reason about that?</div><div class="a">Explicit freshness SLA per route; on-demand revalidation for hot entities; surface "last updated" to users; alert on ingest staleness.</div></div>
+<div class="qcard"><div class="q">11. How do you guarantee correctness with at-least-once queue delivery?</div><div class="a">Idempotent upserts via unique (entity_id, captured_at); side-effect-free worker; DLQ for poison messages.</div></div>
+<div class="qcard"><div class="q">12. What's your testing strategy and what do you deliberately NOT test?</div><div class="a">Pyramid: heavy unit on pure core, integration at I/O seams, thin E2E. Don't test framework/third-party/CSS. (See §16.)</div></div>
+
+<div class="footer">
+DevPulse — Staff-Engineer Project Brief · No application code written yet (per instruction). Reference files in <code>./reference/</code>.<br>
+Awaiting approval to begin implementation (Week-1 scaffold).
+</div>
+</section>
+
+</main>
+</div>
+</body>
+</html>
